@@ -1,0 +1,37 @@
+datasource postgresql {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "node_modules/.prisma/client"
+}
+
+model User {
+  id       String    @id @default(cuid())
+  name     String?
+  email    String?   @unique
+  password String?
+  problems Problem[] @relation("Problem_author")
+}
+
+model Problem {
+  id          String       @id @default(cuid())
+  title       String?
+  status      String?
+  body        Json?
+  publishDate DateTime?
+  publishedAs String?
+  author      User?        @relation("Problem_author", fields: [authorId], references: [id])
+  authorId    String?      @map("author")
+  problemTags ProblemTag[] @relation("Problem_problemTags_ProblemTag_problems")
+
+  @@index([authorId])
+}
+
+model ProblemTag {
+  id       Int       @id @default(autoincrement())
+  name     String?
+  problems Problem[] @relation("Problem_problemTags_ProblemTag_problems")
+}
